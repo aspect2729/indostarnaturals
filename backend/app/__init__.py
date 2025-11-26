@@ -1,0 +1,1 @@
+"""IndoStar Naturals Backend Application"""

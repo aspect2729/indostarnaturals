@@ -1,0 +1,47 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download backend image
+      uses: actions/download-artifact@v4
+      with:
+        name: backend-image
+    
+    - name: Download frontend image
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-image
+    
+    - name: Load Docker images
+      run: |
+        docker load < backend-image.tar.gz
+        docker load < frontend-image.tar.gz
+    
+    - name: Tag images for staging
+      run: |
+        docker tag indostar-backend:${{ github.sha }} indostar-backend:staging
+        docker tag indostar-frontend:${{ github.sha }} indostar-frontend:staging
+    
+    # Add your deployment steps here
+    # Examples:
+    # - Push to container registry (ECR, Docker Hub, etc.)
+    # - Deploy to ECS, Kubernetes, or other orchestration platform
+    # - Update environment variables
+    # - Run database migrations
+    
+    - name: Deployment placeholder
+      run: |
+        echo "Deployment to staging would happen here"
+        echo "Backend image: indostar-backend:staging"
+        echo "Frontend image: indostar-frontend:staging"
+        echo "Configure your deployment target in this workflow"

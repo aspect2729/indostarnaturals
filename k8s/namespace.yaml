@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: indostar-naturals
+  labels:
+    name: indostar-naturals
+    environment: production
