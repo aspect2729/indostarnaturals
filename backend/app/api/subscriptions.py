@@ -76,6 +76,10 @@ def create_subscription(
             detail=str(e)
         )
     except Exception as e:
+        # Log the full error for debugging
+        import traceback
+        print(f"Error creating subscription: {str(e)}")
+        print(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create subscription: {str(e)}"
