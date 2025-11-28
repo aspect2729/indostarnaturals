@@ -154,10 +154,10 @@ const InventoryPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                      ₹{product.consumer_price.toFixed(2)}
+                      ₹{Number(product.consumer_price).toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                      ₹{product.distributor_price.toFixed(2)}
+                      ₹{Number(product.distributor_price).toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {product.is_low_stock ? (

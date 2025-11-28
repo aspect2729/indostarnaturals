@@ -91,7 +91,7 @@ const SubscriptionCard: React.FC<SubscriptionCardProps> = ({
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Price per delivery:</span>
           <span className="font-semibold text-green-600">
-            ₹{subscription.product.consumer_price.toFixed(2)}
+            ₹{Number(subscription.product.consumer_price).toFixed(2)}
           </span>
         </div>
       </div>

@@ -99,7 +99,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
         <div className="flex justify-between items-center">
           <span className="text-gray-700">Price per delivery:</span>
           <span className="font-semibold text-green-600">
-            ₹{product.consumer_price.toFixed(2)}
+            ₹{Number(product.consumer_price).toFixed(2)}
           </span>
         </div>
       </div>

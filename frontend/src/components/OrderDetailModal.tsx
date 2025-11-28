@@ -96,10 +96,10 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, onClose }) =
                       {item.product.unit_size} • SKU: {item.product.sku}
                     </p>
                     <p className="text-sm text-gray-600">
-                      ₹{item.unit_price.toFixed(2)} × {item.quantity}
+                      ₹{Number(item.unit_price).toFixed(2)} × {item.quantity}
                     </p>
                   </div>
-                  <p className="font-semibold text-gray-900">₹{item.total_price.toFixed(2)}</p>
+                  <p className="font-semibold text-gray-900">₹{Number(item.total_price).toFixed(2)}</p>
                 </div>
               ))}
             </div>

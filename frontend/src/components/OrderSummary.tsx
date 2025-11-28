@@ -19,7 +19,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cart, showItems = true }) =
               <div className="flex-1">
                 <p className="font-medium text-gray-900">{item.product.title}</p>
                 <p className="text-gray-600">
-                  Qty: {item.quantity} × ₹{item.unit_price.toFixed(2)}
+                  Qty: {item.quantity} × ₹{Number(item.unit_price).toFixed(2)}
                 </p>
               </div>
               <p className="font-medium text-gray-900">

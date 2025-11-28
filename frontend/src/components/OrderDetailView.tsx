@@ -139,9 +139,9 @@ const OrderDetailView: React.FC<OrderDetailViewProps> = ({ order, onClose, onUpd
                       <td className="px-4 py-3 text-sm text-gray-900">{item.product_title}</td>
                       <td className="px-4 py-3 text-sm text-gray-500">{item.product_sku}</td>
                       <td className="px-4 py-3 text-sm text-gray-900 text-right">{item.quantity}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900 text-right">₹{item.unit_price.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900 text-right">₹{Number(item.unit_price).toFixed(2)}</td>
                       <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right">
-                        ₹{item.total_price.toFixed(2)}
+                        ₹{Number(item.total_price).toFixed(2)}
                       </td>
                     </tr>
                   ))}
