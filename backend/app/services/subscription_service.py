@@ -29,7 +29,18 @@ class SubscriptionService:
     
     def __init__(self):
         """Initialize Razorpay client with API credentials"""
-        self.client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        # Check if Razorpay is configured (not using placeholder values)
+        self.razorpay_enabled = (
+            settings.RAZORPAY_KEY_ID and 
+            settings.RAZORPAY_KEY_SECRET and
+            not settings.RAZORPAY_KEY_ID.startswith('your-') and
+            not settings.RAZORPAY_KEY_SECRET.startswith('your-')
+        )
+        
+        if self.razorpay_enabled:
+            self.client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        else:
+            self.client = None
     
     def create_subscription(
         self,
@@ -96,45 +107,52 @@ class SubscriptionService:
         else:
             price = product.consumer_price
         
-        # Create Razorpay plan based on frequency
-        plan_period = self._get_plan_period(plan_frequency)
-        plan_interval = self._get_plan_interval(plan_frequency)
-        
-        # Create Razorpay plan
-        razorpay_plan = self.client.plan.create({
-            "period": plan_period,
-            "interval": plan_interval,
-            "item": {
-                "name": f"{product.title} - {plan_frequency.value}",
-                "amount": int(price * 100),  # Convert to paise
-                "currency": "INR",
-                "description": f"Subscription for {product.title}"
-            },
-            "notes": {
-                "product_id": str(product_id),
-                "user_id": str(user_id)
-            }
-        })
-        
-        # Create Razorpay subscription
-        # Convert start_date to Unix timestamp if it's in the future
-        start_at_timestamp = None
-        if start_date > date.today():
-            from datetime import datetime
-            start_datetime = datetime.combine(start_date, datetime.min.time())
-            start_at_timestamp = int(start_datetime.timestamp())
-        
-        razorpay_subscription = self.client.subscription.create({
-            "plan_id": razorpay_plan["id"],
-            "customer_notify": 1,
-            "total_count": 0,  # Unlimited billing cycles
-            "start_at": start_at_timestamp,
-            "notes": {
-                "product_id": str(product_id),
-                "user_id": str(user_id),
-                "address_id": str(delivery_address_id)
-            }
-        })
+        # Create Razorpay subscription if enabled, otherwise use mock ID
+        if self.razorpay_enabled:
+            # Create Razorpay plan based on frequency
+            plan_period = self._get_plan_period(plan_frequency)
+            plan_interval = self._get_plan_interval(plan_frequency)
+            
+            # Create Razorpay plan
+            razorpay_plan = self.client.plan.create({
+                "period": plan_period,
+                "interval": plan_interval,
+                "item": {
+                    "name": f"{product.title} - {plan_frequency.value}",
+                    "amount": int(price * 100),  # Convert to paise
+                    "currency": "INR",
+                    "description": f"Subscription for {product.title}"
+                },
+                "notes": {
+                    "product_id": str(product_id),
+                    "user_id": str(user_id)
+                }
+            })
+            
+            # Create Razorpay subscription
+            # Convert start_date to Unix timestamp if it's in the future
+            start_at_timestamp = None
+            if start_date > date.today():
+                from datetime import datetime
+                start_datetime = datetime.combine(start_date, datetime.min.time())
+                start_at_timestamp = int(start_datetime.timestamp())
+            
+            razorpay_subscription = self.client.subscription.create({
+                "plan_id": razorpay_plan["id"],
+                "customer_notify": 1,
+                "total_count": 0,  # Unlimited billing cycles
+                "start_at": start_at_timestamp,
+                "notes": {
+                    "product_id": str(product_id),
+                    "user_id": str(user_id),
+                    "address_id": str(delivery_address_id)
+                }
+            })
+            razorpay_subscription_id = razorpay_subscription["id"]
+        else:
+            # Development mode: use mock subscription ID
+            import uuid
+            razorpay_subscription_id = f"sub_dev_{uuid.uuid4().hex[:16]}"
         
         # Calculate next delivery date
         next_delivery_date = self._calculate_next_delivery_date(start_date, plan_frequency)
@@ -143,7 +161,7 @@ class SubscriptionService:
         subscription = Subscription(
             user_id=user_id,
             product_id=product_id,
-            razorpay_subscription_id=razorpay_subscription["id"],
+            razorpay_subscription_id=razorpay_subscription_id,
             plan_frequency=plan_frequency,
             start_date=start_date,
             next_delivery_date=next_delivery_date,
@@ -218,11 +236,12 @@ class SubscriptionService:
         if subscription.status == SubscriptionStatus.PAUSED:
             raise ValueError("Subscription is already paused")
         
-        # Pause Razorpay subscription
-        try:
-            self.client.subscription.pause(subscription.razorpay_subscription_id)
-        except Exception as e:
-            raise ValueError(f"Failed to pause subscription with Razorpay: {str(e)}")
+        # Pause Razorpay subscription if enabled
+        if self.razorpay_enabled:
+            try:
+                self.client.subscription.pause(subscription.razorpay_subscription_id)
+            except Exception as e:
+                raise ValueError(f"Failed to pause subscription with Razorpay: {str(e)}")
         
         # Update subscription status
         subscription.status = SubscriptionStatus.PAUSED
@@ -269,11 +288,12 @@ class SubscriptionService:
         if subscription.status == SubscriptionStatus.ACTIVE:
             raise ValueError("Subscription is already active")
         
-        # Resume Razorpay subscription
-        try:
-            self.client.subscription.resume(subscription.razorpay_subscription_id)
-        except Exception as e:
-            raise ValueError(f"Failed to resume subscription with Razorpay: {str(e)}")
+        # Resume Razorpay subscription if enabled
+        if self.razorpay_enabled:
+            try:
+                self.client.subscription.resume(subscription.razorpay_subscription_id)
+            except Exception as e:
+                raise ValueError(f"Failed to resume subscription with Razorpay: {str(e)}")
         
         # Update subscription status and recalculate next delivery date
         subscription.status = SubscriptionStatus.ACTIVE
@@ -321,11 +341,12 @@ class SubscriptionService:
         if subscription.status == SubscriptionStatus.CANCELLED:
             raise ValueError("Subscription is already cancelled")
         
-        # Cancel Razorpay subscription
-        try:
-            self.client.subscription.cancel(subscription.razorpay_subscription_id)
-        except Exception as e:
-            raise ValueError(f"Failed to cancel subscription with Razorpay: {str(e)}")
+        # Cancel Razorpay subscription if enabled
+        if self.razorpay_enabled:
+            try:
+                self.client.subscription.cancel(subscription.razorpay_subscription_id)
+            except Exception as e:
+                raise ValueError(f"Failed to cancel subscription with Razorpay: {str(e)}")
         
         # Update subscription status
         subscription.status = SubscriptionStatus.CANCELLED
