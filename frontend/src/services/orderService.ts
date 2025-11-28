@@ -19,8 +19,8 @@ export const orderService = {
    * Get all orders for the current user
    */
   getOrders: async (): Promise<Order[]> => {
-    const response = await api.get<Order[]>('/api/v1/orders')
-    return response.data
+    const response = await api.get<{ orders: Order[] }>('/api/v1/orders')
+    return response.data.orders || []
   },
 
   /**

@@ -16,13 +16,16 @@ const ConsumerDashboardPage: React.FC = () => {
 
   // Fetch orders
   const {
-    data: orders = [],
+    data: ordersData = [],
     isLoading: ordersLoading,
     error: ordersError,
   } = useQuery({
     queryKey: ['orders'],
     queryFn: orderService.getOrders,
   })
+
+  // Ensure orders is always an array
+  const orders = Array.isArray(ordersData) ? ordersData : []
 
   // Fetch subscriptions
   const {
