@@ -60,7 +60,7 @@ const CartPage: React.FC = () => {
 
   // Check if any items are out of stock
   const hasStockIssues = cart.items.some(
-    (item) => item.quantity > item.product.stock_quantity
+    (item) => item.quantity > item.product_stock_quantity
   )
 
   return (
@@ -90,14 +90,14 @@ const CartPage: React.FC = () => {
               {/* Subtotal */}
               <div className="flex justify-between py-2">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">₹{cart.total_amount.toFixed(2)}</span>
+                <span className="font-medium">₹{Number(cart.subtotal ?? 0).toFixed(2)}</span>
               </div>
 
               {/* Discount */}
-              {cart.discount_amount > 0 && (
+              {(cart.discount_amount ?? 0) > 0 && (
                 <div className="flex justify-between py-2 text-green-600">
                   <span>Discount</span>
-                  <span className="font-medium">-₹{cart.discount_amount.toFixed(2)}</span>
+                  <span className="font-medium">-₹{(cart.discount_amount ?? 0).toFixed(2)}</span>
                 </div>
               )}
 
@@ -107,7 +107,7 @@ const CartPage: React.FC = () => {
               {/* Total */}
               <div className="flex justify-between py-2 text-lg font-bold">
                 <span>Total</span>
-                <span>₹{cart.final_amount.toFixed(2)}</span>
+                <span>₹{Number(cart.total ?? 0).toFixed(2)}</span>
               </div>
 
               {/* Stock Warning */}

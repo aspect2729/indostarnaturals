@@ -438,6 +438,7 @@ class CartService:
                 product_title=product.title,
                 product_sku=product.sku,
                 product_image_url=image_url,
+                product_stock_quantity=product.stock_quantity,
                 subtotal=item_subtotal
             )
             item_responses.append(item_response)

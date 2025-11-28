@@ -24,6 +24,7 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onSuccess, onEr
   const { loginWithGoogle } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [isConfigured, setIsConfigured] = useState(true)
+  const [hasError, setHasError] = useState(false)
   const buttonRef = React.useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -43,18 +44,28 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onSuccess, onEr
 
     script.onload = () => {
       if (window.google && buttonRef.current) {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: handleCredentialResponse,
-        })
+        try {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: handleCredentialResponse,
+          })
 
-        window.google.accounts.id.renderButton(buttonRef.current, {
-          theme: 'outline',
-          size: 'large',
-          width: buttonRef.current.offsetWidth,
-          text: 'continue_with',
-        })
+          window.google.accounts.id.renderButton(buttonRef.current, {
+            theme: 'outline',
+            size: 'large',
+            width: buttonRef.current.offsetWidth,
+            text: 'continue_with',
+          })
+        } catch (error) {
+          console.error('Failed to initialize Google Sign-In:', error)
+          setHasError(true)
+        }
       }
+    }
+
+    script.onerror = () => {
+      console.error('Failed to load Google Sign-In script')
+      setHasError(true)
     }
 
     return () => {
@@ -78,7 +89,7 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onSuccess, onEr
     }
   }
 
-  // Don't render anything if Google OAuth is not configured
+  // Don't render if not configured
   if (!isConfigured) {
     return (
       <div className="w-full p-3 bg-gray-100 rounded text-center text-sm text-gray-600">
@@ -87,17 +98,33 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onSuccess, onEr
     )
   }
 
+  // Show error state with helpful message
+  if (hasError) {
+    return (
+      <div className="w-full p-4 bg-yellow-50 border border-yellow-200 rounded">
+        <p className="text-sm text-yellow-800 font-medium mb-2 text-center">
+          ⚠️ Google Sign-In Configuration Required
+        </p>
+        <p className="text-xs text-yellow-700 mb-2">
+          To use Google Sign-In, add <code className="bg-yellow-100 px-1 rounded">http://localhost:5173</code> to 
+          "Authorized JavaScript origins" in your Google Cloud Console OAuth client settings.
+        </p>
+        <p className="text-xs text-yellow-600 text-center">
+          <strong>Use Phone (OTP) authentication below instead</strong>
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full">
-      <div ref={buttonRef} className="w-full" />
+      <div ref={buttonRef} className="w-full min-h-[40px]" />
       {isLoading && (
         <div className="mt-2 text-center">
-          <span className="text-sm text-gray-600">Signing in...</span>
+          <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
+          <span className="text-sm text-gray-600">Signing in with Google...</span>
         </div>
       )}
-      <div className="mt-2 text-xs text-gray-500 text-center">
-        Note: If you see a 403 error, add http://localhost:5173 to authorized origins in Google Cloud Console
-      </div>
     </div>
   )
 }

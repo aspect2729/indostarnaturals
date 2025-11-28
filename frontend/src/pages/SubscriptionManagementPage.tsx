@@ -27,7 +27,7 @@ const SubscriptionManagementPage: React.FC = () => {
       setIsLoading(true)
       setError(null)
       const data = await subscriptionService.getSubscriptions()
-      setSubscriptions(data)
+      setSubscriptions(Array.isArray(data) ? data : [])
     } catch (err) {
       setError('Failed to load subscriptions. Please try again.')
       console.error('Error fetching subscriptions:', err)
@@ -90,7 +90,7 @@ const SubscriptionManagementPage: React.FC = () => {
     }
   }
 
-  const filteredSubscriptions = subscriptions.filter((sub) => {
+  const filteredSubscriptions = (subscriptions || []).filter((sub) => {
     if (filter === 'all') return true
     return sub.status === filter
   })

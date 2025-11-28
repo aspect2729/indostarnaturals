@@ -46,7 +46,7 @@ def validate_email_rfc5322(email: str) -> str:
 def validate_phone_with_country_code(phone: str) -> str:
     """
     Validate phone number format with country code.
-    Currently supports Indian phone numbers (+91).
+    Supports international phone numbers with country codes.
     
     Args:
         phone: Phone number to validate
@@ -60,10 +60,10 @@ def validate_phone_with_country_code(phone: str) -> str:
     # Remove spaces and dashes
     phone_cleaned = phone.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
     
-    # Check if it matches Indian phone number format: +91XXXXXXXXXX
-    # Indian mobile numbers start with 6, 7, 8, or 9
-    if not re.match(r'^\+91[6-9]\d{9}$', phone_cleaned):
-        raise ValueError('Phone number must be in format +91XXXXXXXXXX (Indian mobile number)')
+    # Check if it matches international phone number format: +[country code][number]
+    # Must start with + and have 10-15 digits total
+    if not re.match(r'^\+\d{10,15}$', phone_cleaned):
+        raise ValueError('Phone number must be in format +[country code][number] (e.g., +911234567890 or +11234567890)')
     
     return phone_cleaned
 

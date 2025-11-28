@@ -68,15 +68,23 @@ class OTPService:
             key = f"otp:{phone}"
             stored_otp = redis.get(key)
             
+            # Debug logging
+            print(f"[DEBUG] Verifying OTP for phone: {phone}")
+            print(f"[DEBUG] Received OTP: {otp}")
+            print(f"[DEBUG] Stored OTP: {stored_otp}")
+            
             if stored_otp is None:
+                print(f"[DEBUG] No OTP found in Redis for key: {key}")
                 return False
             
             # Verify OTP matches
             if stored_otp == otp:
                 # Delete OTP after successful verification
                 redis.delete(key)
+                print(f"[DEBUG] OTP verified successfully!")
                 return True
             
+            print(f"[DEBUG] OTP mismatch!")
             return False
         except ConnectionError as e:
             raise ConnectionError("Redis is not available. Please ensure Redis server is running. See REDIS_SETUP_GUIDE.md for instructions.") from e

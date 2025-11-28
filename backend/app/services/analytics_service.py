@@ -52,6 +52,7 @@ class AnalyticsService:
 
         low_stock_alerts = [
             {
+                "id": product.id,
                 "product_id": product.id,
                 "title": product.title,
                 "sku": product.sku,

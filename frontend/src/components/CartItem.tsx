@@ -13,8 +13,8 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
 
   const handleQuantityChange = async (newQuantity: number) => {
     if (newQuantity < 1) return
-    if (newQuantity > item.product.stock_quantity) {
-      alert(`Only ${item.product.stock_quantity} items available in stock`)
+    if (newQuantity > item.product_stock_quantity) {
+      alert(`Only ${item.product_stock_quantity} items available in stock`)
       return
     }
 
@@ -40,11 +40,11 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
     }
   }
 
-  const itemTotal = item.quantity * item.unit_price
-  const imageUrl = item.product.images[0]?.url || '/placeholder-product.png'
-  const imageAlt = item.product.images[0]?.alt_text || item.product.title
+  const itemTotal = item.subtotal
+  const imageUrl = item.product_image_url || '/placeholder-product.png'
+  const imageAlt = item.product_title || 'Product'
 
-  const isOutOfStock = item.quantity > item.product.stock_quantity
+  const isOutOfStock = item.quantity > item.product_stock_quantity
 
   return (
     <div
@@ -63,18 +63,18 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
 
       {/* Product Details */}
       <div className="flex-1">
-        <h3 className="font-semibold text-gray-900">{item.product.title}</h3>
+        <h3 className="font-semibold text-gray-900">{item.product_title || 'Product'}</h3>
         <p className="text-sm text-gray-600 mt-1">
-          {item.product.unit_size} • SKU: {item.product.sku}
+          SKU: {item.product_sku || 'N/A'}
         </p>
         <p className="text-sm font-medium text-gray-900 mt-2">
-          ₹{item.unit_price.toFixed(2)} each
+          ₹{Number(item.unit_price ?? 0).toFixed(2)} each
         </p>
 
         {/* Stock Warning */}
         {isOutOfStock && (
           <p className="text-sm text-red-600 mt-2 font-medium">
-            ⚠️ Only {item.product.stock_quantity} items available
+            ⚠️ Only {item.product_stock_quantity} items available
           </p>
         )}
       </div>
@@ -93,7 +93,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           <span className="w-12 text-center font-medium">{item.quantity}</span>
           <button
             onClick={() => handleQuantityChange(item.quantity + 1)}
-            disabled={isUpdating || item.quantity >= item.product.stock_quantity}
+            disabled={isUpdating || item.quantity >= (item.product?.stock_quantity ?? 0)}
             className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Increase quantity"
           >
@@ -103,7 +103,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
 
         {/* Item Total */}
         <p className="text-lg font-bold text-gray-900">
-          ₹{itemTotal.toFixed(2)}
+          ₹{Number(itemTotal ?? 0).toFixed(2)}
         </p>
 
         {/* Remove Button */}

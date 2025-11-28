@@ -97,40 +97,60 @@ async def verify_otp(
     
     Rate limited to 5 attempts per 15 minutes per IP address.
     """
-    # Get client IP for rate limiting
-    client_ip = request.client.host if request.client else "unknown"
-    
-    # Check rate limit
-    if not RateLimiter.check_rate_limit(
-        identifier=f"verify:{client_ip}",
-        max_attempts=5,
-        window_minutes=15
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Too many verification attempts. Please try again later."
+    try:
+        # Get client IP for rate limiting
+        client_ip = request.client.host if request.client else "unknown"
+        
+        # Check rate limit
+        if not RateLimiter.check_rate_limit(
+            identifier=f"verify:{client_ip}",
+            max_attempts=5,
+            window_minutes=15
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many verification attempts. Please try again later."
+            )
+        
+        # Authenticate with OTP
+        result = user_service.authenticate_with_otp(
+            phone=request_data.phone,
+            otp=request_data.otp,
+            db=db
         )
-    
-    # Authenticate with OTP
-    result = user_service.authenticate_with_otp(
-        phone=request_data.phone,
-        otp=request_data.otp,
-        db=db
-    )
-    
-    if not result:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid OTP code"
+        
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid OTP code"
+            )
+        
+        user, access_token, refresh_token = result
+        
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            user=UserResponse.model_validate(user)
         )
-    
-    user, access_token, refresh_token = result
-    
-    return TokenResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        user=UserResponse.model_validate(user)
-    )
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except ConnectionError as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Redis connection error in verify_otp: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service is temporarily unavailable. Redis server is not running."
+        )
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Unexpected error in verify_otp: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred: {str(e)}"
+        )
 
 
 @router.post("/google", response_model=TokenResponse)

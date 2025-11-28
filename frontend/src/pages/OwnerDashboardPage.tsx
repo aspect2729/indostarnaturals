@@ -24,12 +24,15 @@ const OwnerDashboardPage: React.FC = () => {
 
   // Fetch recent orders
   const {
-    data: orders = [],
+    data: ordersData,
     isLoading: ordersLoading,
   } = useQuery({
     queryKey: ['recent-orders'],
     queryFn: orderService.getOrders,
   })
+
+  // Ensure orders is always an array
+  const orders = Array.isArray(ordersData) ? ordersData : []
 
   // Get date range for revenue report
   const getDateRange = (range: '7d' | '30d' | '90d') => {

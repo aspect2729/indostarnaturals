@@ -48,6 +48,7 @@ class CartItemResponse(BaseModel):
     product_title: str
     product_sku: str
     product_image_url: Optional[str] = None
+    product_stock_quantity: int
     subtotal: Decimal
     
     class Config:

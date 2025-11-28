@@ -10,7 +10,12 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
-  const primaryImage = product.images.find((img) => img.display_order === 0) || product.images[0]
+  // Safety check
+  if (!product) {
+    return null
+  }
+
+  const primaryImage = product.images?.find((img) => img.display_order === 0) || product.images?.[0]
   const imageUrl = primaryImage?.url || '/placeholder-product.png'
   const imageAlt = primaryImage?.alt_text || product.title
 
@@ -22,7 +27,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
     }
   }
 
-  const isOutOfStock = product.stock_quantity === 0
+  const isOutOfStock = (product.stock_quantity ?? 0) === 0
 
   return (
     <Link
@@ -61,7 +66,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
             consumerPrice={product.consumer_price}
             distributorPrice={product.distributor_price}
           />
-          {product.stock_quantity > 0 && product.stock_quantity <= 10 && (
+          {(product.stock_quantity ?? 0) > 0 && (product.stock_quantity ?? 0) <= 10 && (
             <span className="text-xs text-orange-600 font-medium">
               Only {product.stock_quantity} left
             </span>
