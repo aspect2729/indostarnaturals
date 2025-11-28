@@ -32,6 +32,7 @@ export interface Category {
   slug: string
   parent_id: number | null
   display_order: number
+  description?: string
 }
 
 export interface ProductFilters {

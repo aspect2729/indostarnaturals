@@ -47,6 +47,7 @@ describe('Accessibility Properties', () => {
       // Arrange: Create a product with an image
       const product: Product = {
         id: 1,
+        owner_id: 1,
         title: 'Organic Jaggery',
         description: 'Pure organic jaggery',
         category_id: 1,
@@ -124,6 +125,7 @@ describe('Accessibility Properties', () => {
       const products: Product[] = [
         {
           id: 1,
+          owner_id: 1,
           title: 'Product 1',
           description: 'Description 1',
           category_id: 1,
@@ -150,6 +152,7 @@ describe('Accessibility Properties', () => {
         },
         {
           id: 2,
+          owner_id: 1,
           title: 'Product 2',
           description: 'Description 2',
           category_id: 1,
@@ -199,6 +202,7 @@ describe('Accessibility Properties', () => {
       // Arrange: Create a product with image but no alt_text
       const product: Product = {
         id: 1,
+        owner_id: 1,
         title: 'Test Product',
         description: 'Test description',
         category_id: 1,
@@ -249,6 +253,7 @@ describe('Accessibility Properties', () => {
       // Arrange: Create a product with an image
       const product: Product = {
         id: 1,
+        owner_id: 1,
         title: 'Organic Milk',
         description: 'Fresh organic milk',
         category_id: 1,
@@ -333,6 +338,7 @@ describe('Accessibility Properties', () => {
       // Arrange: Create multiple products
       const products: Product[] = Array.from({ length: 5 }, (_, i) => ({
         id: i + 1,
+        owner_id: 1,
         title: `Product ${i + 1}`,
         description: `Description ${i + 1}`,
         category_id: 1,

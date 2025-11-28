@@ -171,7 +171,7 @@ const Header = () => {
                   aria-label="User menu"
                 >
                   <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center text-white font-semibold text-sm">
-                    {(user.name || user.email).charAt(0).toUpperCase()}
+                    {((user.name || user.email) ?? 'U').charAt(0).toUpperCase()}
                   </div>
                   <span className="hidden md:inline font-medium">{user.name || user.email}</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

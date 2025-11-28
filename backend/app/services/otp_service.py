@@ -36,11 +36,17 @@ class OTPService:
             
         Returns:
             True if stored successfully
+            
+        Raises:
+            ConnectionError: If Redis is not available
         """
-        redis = get_redis()
-        key = f"otp:{phone}"
-        redis.setex(key, OTP_EXPIRATION, otp)
-        return True
+        try:
+            redis = get_redis()
+            key = f"otp:{phone}"
+            redis.setex(key, OTP_EXPIRATION, otp)
+            return True
+        except ConnectionError as e:
+            raise ConnectionError("Redis is not available. Please ensure Redis server is running. See REDIS_SETUP_GUIDE.md for instructions.") from e
     
     @staticmethod
     def verify_otp(phone: str, otp: str) -> bool:
@@ -53,21 +59,27 @@ class OTPService:
             
         Returns:
             True if OTP is valid, False otherwise
+            
+        Raises:
+            ConnectionError: If Redis is not available
         """
-        redis = get_redis()
-        key = f"otp:{phone}"
-        stored_otp = redis.get(key)
-        
-        if stored_otp is None:
+        try:
+            redis = get_redis()
+            key = f"otp:{phone}"
+            stored_otp = redis.get(key)
+            
+            if stored_otp is None:
+                return False
+            
+            # Verify OTP matches
+            if stored_otp == otp:
+                # Delete OTP after successful verification
+                redis.delete(key)
+                return True
+            
             return False
-        
-        # Verify OTP matches
-        if stored_otp == otp:
-            # Delete OTP after successful verification
-            redis.delete(key)
-            return True
-        
-        return False
+        except ConnectionError as e:
+            raise ConnectionError("Redis is not available. Please ensure Redis server is running. See REDIS_SETUP_GUIDE.md for instructions.") from e
     
     @staticmethod
     def send_otp_sms(phone: str, otp: str) -> bool:

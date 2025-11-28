@@ -14,7 +14,7 @@ const createTestQueryClient = () =>
     defaultOptions: {
       queries: {
         retry: false,
-        cacheTime: 0,
+        gcTime: 0,
       },
       mutations: {
         retry: false,
@@ -62,8 +62,10 @@ export const mockUser = {
 // Mock product for testing
 export const mockProduct = {
   id: 1,
+  owner_id: 1,
   title: 'Test Product',
   description: 'Test Description',
+  category_id: 1,
   consumer_price: 100.0,
   distributor_price: 80.0,
   stock_quantity: 50,
@@ -71,11 +73,15 @@ export const mockProduct = {
   unit_size: '1 Unit',
   is_active: true,
   is_subscription_available: false,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
   images: [],
   category: {
     id: 1,
     name: 'Test Category',
     slug: 'test-category',
+    parent_id: null,
+    display_order: 1,
   },
 }
 

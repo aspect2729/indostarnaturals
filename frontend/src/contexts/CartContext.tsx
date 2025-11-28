@@ -55,6 +55,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Add item to cart with optimistic update
   const addToCart = async (data: AddToCartRequest) => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      const error = 'Please log in to add items to cart'
+      setError(error)
+      throw new Error(error)
+    }
+
     try {
       setError(null)
       
@@ -81,7 +88,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(updatedCart)
     } catch (err: any) {
       console.error('Failed to add item to cart:', err)
-      setError(err.response?.data?.error?.message || 'Failed to add item to cart')
+      const errorMessage = err.response?.data?.detail || err.response?.data?.error?.message || err.message || 'Failed to add item to cart'
+      setError(errorMessage)
       // Revert optimistic update by refetching
       await fetchCart()
       throw err
@@ -111,7 +119,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(updatedCart)
     } catch (err: any) {
       console.error('Failed to update item quantity:', err)
-      setError(err.response?.data?.error?.message || 'Failed to update quantity')
+      const errorMessage = err.response?.data?.detail || err.response?.data?.error?.message || err.message || 'Failed to update quantity'
+      setError(errorMessage)
       // Revert optimistic update
       setCart(previousCart)
       throw err
@@ -139,7 +148,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(updatedCart)
     } catch (err: any) {
       console.error('Failed to remove item:', err)
-      setError(err.response?.data?.error?.message || 'Failed to remove item')
+      const errorMessage = err.response?.data?.detail || err.response?.data?.error?.message || err.message || 'Failed to remove item'
+      setError(errorMessage)
       // Revert optimistic update
       setCart(previousCart)
       throw err
@@ -154,7 +164,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(updatedCart)
     } catch (err: any) {
       console.error('Failed to apply coupon:', err)
-      setError(err.response?.data?.error?.message || 'Failed to apply coupon')
+      const errorMessage = err.response?.data?.detail || err.response?.data?.error?.message || err.message || 'Failed to apply coupon'
+      setError(errorMessage)
       throw err
     }
   }
@@ -167,7 +178,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(updatedCart)
     } catch (err: any) {
       console.error('Failed to remove coupon:', err)
-      setError(err.response?.data?.error?.message || 'Failed to remove coupon')
+      const errorMessage = err.response?.data?.detail || err.response?.data?.error?.message || err.message || 'Failed to remove coupon'
+      setError(errorMessage)
       throw err
     }
   }

@@ -80,7 +80,11 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onSuccess, onEr
 
   // Don't render anything if Google OAuth is not configured
   if (!isConfigured) {
-    return null
+    return (
+      <div className="w-full p-3 bg-gray-100 rounded text-center text-sm text-gray-600">
+        Google Sign-In not configured
+      </div>
+    )
   }
 
   return (
@@ -91,6 +95,9 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onSuccess, onEr
           <span className="text-sm text-gray-600">Signing in...</span>
         </div>
       )}
+      <div className="mt-2 text-xs text-gray-500 text-center">
+        Note: If you see a 403 error, add http://localhost:5173 to authorized origins in Google Cloud Console
+      </div>
     </div>
   )
 }

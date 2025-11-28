@@ -18,7 +18,7 @@ describe('ProductCard', () => {
   it('displays product image', () => {
     const productWithImage = {
       ...mockProduct,
-      images: [{ id: 1, url: 'https://example.com/image.jpg', alt_text: 'Product image' }]
+      images: [{ id: 1, product_id: 1, url: 'https://example.com/image.jpg', alt_text: 'Product image', display_order: 1, created_at: new Date().toISOString() }]
     }
     
     render(<ProductCard product={productWithImage} />)

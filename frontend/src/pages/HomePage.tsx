@@ -367,7 +367,7 @@ const HomePage = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white text-xl font-bold">
-                    {(user.name || user.email).charAt(0).toUpperCase()}
+                    {((user.name || user.email) ?? 'U').charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <h2 className="text-2xl font-display font-semibold text-neutral-900">

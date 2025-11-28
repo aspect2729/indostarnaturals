@@ -21,8 +21,9 @@ const PriceDisplay: React.FC<PriceDisplayProps> = ({
   const price = user?.role === UserRole.DISTRIBUTOR ? distributorPrice : consumerPrice
   const priceLabel = user?.role === UserRole.DISTRIBUTOR ? 'Distributor Price' : 'Price'
 
-  // Format price to 2 decimal places
-  const formattedPrice = `₹${price.toFixed(2)}`
+  // Format price to 2 decimal places - convert to number if it's a string
+  const numericPrice = typeof price === 'string' ? parseFloat(price) : price
+  const formattedPrice = `₹${numericPrice.toFixed(2)}`
 
   return (
     <div className={`price-display ${className}`}>

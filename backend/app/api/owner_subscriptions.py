@@ -41,7 +41,7 @@ class DeliveryCalendarItem(BaseModel):
     status: SubscriptionStatus
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class DeliveryCalendarResponse(BaseModel):

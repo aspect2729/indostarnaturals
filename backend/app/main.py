@@ -72,6 +72,11 @@ app.include_router(analytics.router)
 app.include_router(owner_users.router)
 app.include_router(webhooks.router)
 
+# Test endpoints (development only)
+if settings.ENVIRONMENT == "development":
+    from app.api import test_auth
+    app.include_router(test_auth.router)
+
 
 @app.get("/")
 async def root():

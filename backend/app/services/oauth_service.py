@@ -23,29 +23,45 @@ class GoogleOAuthService:
             User information dict if valid, None otherwise
         """
         try:
+            import logging
+            logger = logging.getLogger(__name__)
+            
             # Verify the token
+            logger.info(f"Verifying Google token with client ID: {settings.GOOGLE_OAUTH_CLIENT_ID[:20]}...")
             idinfo = id_token.verify_oauth2_token(
                 token,
                 requests.Request(),
                 settings.GOOGLE_OAUTH_CLIENT_ID
             )
             
+            logger.info(f"Token verified successfully. Issuer: {idinfo.get('iss')}")
+            
             # Verify the issuer
             if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+                logger.warning(f"Invalid issuer: {idinfo['iss']}")
                 return None
             
             # Extract user information
-            return {
+            user_info = {
                 'google_id': idinfo['sub'],
                 'email': idinfo.get('email'),
                 'name': idinfo.get('name'),
                 'picture': idinfo.get('picture'),
                 'email_verified': idinfo.get('email_verified', False)
             }
+            logger.info(f"Extracted user info for email: {user_info.get('email')}")
+            return user_info
             
         except ValueError as e:
             # Invalid token
-            print(f"Error verifying Google token: {e}")
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error verifying Google token: {e}", exc_info=True)
+            return None
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Unexpected error verifying Google token: {e}", exc_info=True)
             return None
     
     @staticmethod

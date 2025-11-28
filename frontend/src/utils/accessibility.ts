@@ -106,7 +106,7 @@ export const getAccessibleName = (element: HTMLElement): string => {
 /**
  * Validates alt text quality
  */
-export const validateAltText = (altText: string, context?: string): {
+export const validateAltText = (altText: string, _context?: string): {
   isValid: boolean
   message?: string
 } => {

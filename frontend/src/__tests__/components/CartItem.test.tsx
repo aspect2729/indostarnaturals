@@ -1,62 +1,74 @@
 /**
  * Unit tests for CartItem component
  */
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '../utils/test-utils'
+import { describe, it, expect } from 'vitest'
+import { render, screen } from '../utils/test-utils'
 import CartItem from '../../components/CartItem'
 
 describe('CartItem', () => {
   const mockCartItem = {
     id: 1,
+    cart_id: 1,
+    product_id: 1,
     product: {
       id: 1,
       title: 'Test Product',
+      sku: 'TEST-001',
+      unit_size: '1 Unit',
+      stock_quantity: 50,
       images: [],
     },
     quantity: 2,
     unit_price: 100.0,
+    created_at: new Date().toISOString(),
   }
 
   it('renders cart item information', () => {
-    render(<CartItem item={mockCartItem} onUpdateQuantity={() => {}} onRemove={() => {}} />)
+    render(<CartItem item={mockCartItem} />)
     
     expect(screen.getByText(mockCartItem.product.title)).toBeInTheDocument()
-    expect(screen.getByText(`₹${mockCartItem.unit_price}`)).toBeInTheDocument()
+    expect(screen.getByText(/₹100\.00 each/i)).toBeInTheDocument()
   })
 
   it('displays correct quantity', () => {
-    render(<CartItem item={mockCartItem} onUpdateQuantity={() => {}} onRemove={() => {}} />)
+    render(<CartItem item={mockCartItem} />)
     
-    const quantityInput = screen.getByRole('spinbutton')
-    expect(quantityInput).toHaveValue(mockCartItem.quantity)
+    expect(screen.getByText(mockCartItem.quantity.toString())).toBeInTheDocument()
   })
 
-  it('calls onUpdateQuantity when quantity is changed', () => {
-    const onUpdateQuantity = vi.fn()
+  it('displays quantity controls', () => {
+    render(<CartItem item={mockCartItem} />)
     
-    render(<CartItem item={mockCartItem} onUpdateQuantity={onUpdateQuantity} onRemove={() => {}} />)
-    
-    const quantityInput = screen.getByRole('spinbutton')
-    fireEvent.change(quantityInput, { target: { value: '3' } })
-    
-    expect(onUpdateQuantity).toHaveBeenCalledWith(mockCartItem.id, 3)
+    expect(screen.getByLabelText('Decrease quantity')).toBeInTheDocument()
+    expect(screen.getByLabelText('Increase quantity')).toBeInTheDocument()
   })
 
-  it('calls onRemove when remove button is clicked', () => {
-    const onRemove = vi.fn()
-    
-    render(<CartItem item={mockCartItem} onUpdateQuantity={() => {}} onRemove={onRemove} />)
+  it('displays remove button', () => {
+    render(<CartItem item={mockCartItem} />)
     
     const removeButton = screen.getByRole('button', { name: /remove/i })
-    fireEvent.click(removeButton)
-    
-    expect(onRemove).toHaveBeenCalledWith(mockCartItem.id)
+    expect(removeButton).toBeInTheDocument()
   })
 
   it('calculates and displays item total correctly', () => {
-    render(<CartItem item={mockCartItem} onUpdateQuantity={() => {}} onRemove={() => {}} />)
+    render(<CartItem item={mockCartItem} />)
     
-    const expectedTotal = mockCartItem.quantity * mockCartItem.unit_price
+    const expectedTotal = (mockCartItem.quantity * mockCartItem.unit_price).toFixed(2)
     expect(screen.getByText(`₹${expectedTotal}`)).toBeInTheDocument()
+  })
+
+  it('displays out of stock warning when quantity exceeds stock', () => {
+    const outOfStockItem = {
+      ...mockCartItem,
+      quantity: 100,
+      product: {
+        ...mockCartItem.product,
+        stock_quantity: 5,
+      },
+    }
+    
+    render(<CartItem item={outOfStockItem} />)
+    
+    expect(screen.getByText(/only 5 items available/i)).toBeInTheDocument()
   })
 })

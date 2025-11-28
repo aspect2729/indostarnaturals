@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import FilterSidebar from '../components/FilterSidebar'
 import SearchBar from '../components/SearchBar'
@@ -7,11 +7,14 @@ import Pagination from '../components/Pagination'
 import { ProductFilters } from '../types/product'
 import { useProducts, useCategories } from '../hooks/useProducts'
 import { useCart } from '../contexts/CartContext'
+import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../components/ToastContainer'
 
 const ProductCatalogPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const { addToCart } = useCart()
+  const { isAuthenticated } = useAuth()
   const { showToast } = useToast()
   
   // Initialize filters from URL params
@@ -70,11 +73,19 @@ const ProductCatalogPage: React.FC = () => {
   }
 
   const handleAddToCart = async (productId: number) => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      showToast('Please log in to add items to cart', 'error')
+      navigate('/login')
+      return
+    }
+
     try {
       await addToCart({ product_id: productId, quantity: 1 })
       showToast('Product added to cart successfully', 'success')
-    } catch (error) {
-      showToast('Failed to add product to cart', 'error')
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to add product to cart'
+      showToast(errorMessage, 'error')
     }
   }
 
