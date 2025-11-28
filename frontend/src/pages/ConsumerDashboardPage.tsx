@@ -29,12 +29,15 @@ const ConsumerDashboardPage: React.FC = () => {
 
   // Fetch subscriptions
   const {
-    data: subscriptions = [],
+    data: subscriptionsData = [],
     isLoading: subscriptionsLoading,
   } = useQuery({
     queryKey: ['subscriptions'],
     queryFn: subscriptionService.getSubscriptions,
   })
+
+  // Ensure subscriptions is always an array
+  const subscriptions = Array.isArray(subscriptionsData) ? subscriptionsData : []
 
   const activeSubscriptions = subscriptions.filter(
     (sub) => sub.status === SubscriptionStatus.ACTIVE

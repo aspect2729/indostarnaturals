@@ -19,8 +19,8 @@ export const createSubscription = async (
  * Get all subscriptions for the current user
  */
 export const getSubscriptions = async (): Promise<Subscription[]> => {
-  const response = await api.get<Subscription[]>('/api/v1/subscriptions')
-  return response.data
+  const response = await api.get<{ subscriptions: Subscription[] }>('/api/v1/subscriptions')
+  return response.data.subscriptions || []
 }
 
 /**
