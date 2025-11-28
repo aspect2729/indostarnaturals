@@ -14,11 +14,11 @@ class Subscription(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     razorpay_subscription_id = Column(String(255), unique=True, nullable=False, index=True)
-    plan_frequency = Column(SQLEnum(SubscriptionFrequency), nullable=False)
+    plan_frequency = Column(SQLEnum(SubscriptionFrequency, values_callable=lambda x: [e.value for e in x]), nullable=False)
     start_date = Column(Date, nullable=False)
     next_delivery_date = Column(Date, nullable=False)
     delivery_address_id = Column(Integer, ForeignKey("addresses.id"), nullable=False)
-    status = Column(SQLEnum(SubscriptionStatus), nullable=False, default=SubscriptionStatus.ACTIVE, server_default='active', index=True)
+    status = Column(SQLEnum(SubscriptionStatus, values_callable=lambda x: [e.value for e in x]), nullable=False, default=SubscriptionStatus.ACTIVE, server_default='active', index=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow, server_default='now()')
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow, server_default='now()')
 
