@@ -10,6 +10,11 @@ describe('CartItem', () => {
     id: 1,
     cart_id: 1,
     product_id: 1,
+    product_title: 'Test Product',
+    product_sku: 'TEST-001',
+    product_image_url: null,
+    product_stock_quantity: 50,
+    subtotal: 200.0,
     product: {
       id: 1,
       title: 'Test Product',
@@ -61,6 +66,8 @@ describe('CartItem', () => {
     const outOfStockItem = {
       ...mockCartItem,
       quantity: 100,
+      product_stock_quantity: 5,
+      subtotal: 10000.0,
       product: {
         ...mockCartItem.product,
         stock_quantity: 5,
