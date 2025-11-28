@@ -17,7 +17,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cart, showItems = true }) =
           {cart.items.map((item) => (
             <div key={item.id} className="flex justify-between text-sm">
               <div className="flex-1">
-                <p className="font-medium text-gray-900">{item.product.title}</p>
+                <p className="font-medium text-gray-900">{item.product_title}</p>
                 <p className="text-gray-600">
                   Qty: {item.quantity} × ₹{Number(item.unit_price).toFixed(2)}
                 </p>
@@ -34,7 +34,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cart, showItems = true }) =
       <div className="space-y-2">
         <div className="flex justify-between text-gray-600">
           <span>Subtotal ({cart.items.length} items)</span>
-          <span>₹{cart.total_amount.toFixed(2)}</span>
+          <span>₹{Number(cart.subtotal).toFixed(2)}</span>
         </div>
 
         {cart.discount_amount > 0 && (
@@ -58,7 +58,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cart, showItems = true }) =
       {/* Total */}
       <div className="flex justify-between text-lg font-bold text-gray-900">
         <span>Total Amount</span>
-        <span>₹{cart.final_amount.toFixed(2)}</span>
+        <span>₹{Number(cart.total).toFixed(2)}</span>
       </div>
 
       {/* Tax Note */}

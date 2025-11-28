@@ -93,7 +93,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           <span className="w-12 text-center font-medium">{item.quantity}</span>
           <button
             onClick={() => handleQuantityChange(item.quantity + 1)}
-            disabled={isUpdating || item.quantity >= (item.product?.stock_quantity ?? 0)}
+            disabled={isUpdating || item.quantity >= item.product_stock_quantity}
             className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Increase quantity"
           >

@@ -58,7 +58,7 @@ const TestPage = () => {
             <h2 className="text-xl font-semibold mb-2">Cart Status:</h2>
             <div className="bg-gray-100 p-4 rounded space-y-2">
               <p><strong>Cart Items:</strong> {cart?.items.length || 0}</p>
-              <p><strong>Total:</strong> ₹{cart?.total_amount || 0}</p>
+              <p><strong>Total:</strong> ₹{cart?.total || 0}</p>
             </div>
           </div>
 

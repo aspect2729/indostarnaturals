@@ -9,6 +9,14 @@ export interface CartItem {
   product_image_url: string | null
   product_stock_quantity: number
   subtotal: number
+  product?: {
+    id: number
+    title: string
+    sku: string
+    unit_size: string
+    stock_quantity: number
+    images: string[]
+  }
 }
 
 export interface Cart {
@@ -18,6 +26,8 @@ export interface Cart {
   discount_amount: number
   subtotal: number
   total: number
+  total_amount?: number  // Alias for total
+  final_amount?: number  // Alias for total
   created_at: string
   updated_at: string
   items: CartItem[]
