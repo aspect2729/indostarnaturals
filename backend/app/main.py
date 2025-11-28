@@ -41,19 +41,27 @@ add_security_middleware(app)
 add_exception_handlers(app)
 
 # CORS Configuration
-# Allow multiple frontend origins for development
+# Allow multiple frontend origins for development and production
 allowed_origins = [
-    settings.FRONTEND_URL,
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://localhost:3000",
+    settings.FRONTEND_URL,  # Production frontend URL (set in environment variables)
+    "http://localhost:5173",  # Local Vite dev server
+    "http://localhost:5174",  # Alternative local port
+    "http://localhost:3000",  # Alternative local port
 ]
+
+# In production, also allow Vercel preview deployments
+if settings.ENVIRONMENT == "production":
+    # Add your Vercel domain pattern
+    # Vercel preview URLs follow pattern: https://your-app-*.vercel.app
+    allowed_origins.append("https://*.vercel.app")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include routers
