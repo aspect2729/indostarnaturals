@@ -8,7 +8,7 @@ from app.core.logging_config import configure_logging
 from app.core.security_middleware import add_security_middleware
 from app.core.error_handlers import add_exception_handlers
 from app.core.request_id_middleware import RequestIDMiddleware
-from app.api import auth, users, products, owner_products, cart, webhooks, orders, owner_orders, subscriptions, owner_subscriptions, distributors, bulk_discounts, analytics, owner_users
+from app.api import auth, users, products, owner_products, cart, webhooks, orders, owner_orders, subscriptions, owner_subscriptions, distributors, bulk_discounts, analytics, owner_users, admin_migrations
 
 # Suppress pkg_resources deprecation warning from razorpay
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="pkg_resources")
@@ -84,6 +84,7 @@ app.include_router(bulk_discounts.router)
 app.include_router(analytics.router)
 app.include_router(owner_users.router)
 app.include_router(webhooks.router)
+app.include_router(admin_migrations.router)  # Temporary - remove after deployment
 
 # Test endpoints (development only)
 if settings.ENVIRONMENT == "development":
