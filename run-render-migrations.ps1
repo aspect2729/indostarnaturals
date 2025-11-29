@@ -91,4 +91,4 @@ try {
 }
 
 Write-Host "`nPress any key to exit..."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
