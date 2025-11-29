@@ -52,60 +52,19 @@ allowed_origins = [
 if settings.FRONTEND_URL:
     allowed_origins.append(settings.FRONTEND_URL)
 
-# Add Vercel deployment URLs
+# Add Vercel deployment URLs - use regex pattern to allow all preview deployments
 allowed_origins.extend([
     "https://indostarnaturals.vercel.app",
-    "https://indostarnaturals-git-main.vercel.app",  # Git branch deployments
+    "https://indostarnaturals-git-main.vercel.app",
 ])
 
 logger.info(f"CORS allowed origins: {allowed_origins}")
 
-# For Vercel preview deployments, we need to allow origin pattern matching
-from fastapi.middleware.cors import CORSMiddleware as BaseCORSMiddleware
-
-def is_allowed_origin(origin: str) -> bool:
-    """Check if origin is allowed, including Vercel preview deployments"""
-    if origin in allowed_origins:
-        return True
-    # Allow all Vercel preview deployments for this project
-    if origin.startswith("https://indostarnaturals-") and origin.endswith(".vercel.app"):
-        return True
-    return False
-
-# Custom CORS middleware that handles Vercel preview URLs
-@app.middleware("http")
-async def cors_middleware(request, call_next):
-    from fastapi.responses import Response
-    
-    origin = request.headers.get("origin")
-    
-    # Handle preflight requests
-    if request.method == "OPTIONS" and origin and is_allowed_origin(origin):
-        return Response(
-            status_code=200,
-            headers={
-                "Access-Control-Allow-Origin": origin,
-                "Access-Control-Allow-Credentials": "true",
-                "Access-Control-Allow-Methods": "*",
-                "Access-Control-Allow-Headers": "*",
-                "Access-Control-Max-Age": "3600",
-            }
-        )
-    
-    response = await call_next(request)
-    
-    if origin and is_allowed_origin(origin):
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Methods"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-        response.headers["Access-Control-Expose-Headers"] = "*"
-    
-    return response
-
+# Use allow_origin_regex to match all Vercel preview deployments
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
+    allow_origin_regex=r"https://indostarnaturals-.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
