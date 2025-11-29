@@ -1,0 +1,32 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: indostarnaturals-backend
+    env: python
+    region: oregon
+    plan: free
+    branch: master
+    rootDir: backend
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt && alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 60
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: 7
+      - key: ENVIRONMENT
+        value: production
+      # Add these manually in Render dashboard:
+      # - DATABASE_URL (from your PostgreSQL)
+      # - REDIS_URL (from your Redis)
+      # - JWT_SECRET_KEY (generate random string)
+      # - FRONTEND_URL (your Vercel URL)
+      # - RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
+      # - TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER
+      # - SENDGRID_API_KEY, SENDGRID_FROM_EMAIL
+      # - GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET
