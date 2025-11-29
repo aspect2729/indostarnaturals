@@ -6,52 +6,69 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 # Create Redis client (lazy connection - will connect on first use)
-# Support both redis:// and rediss:// (TLS) URLs
-try:
-    # Upstash requires longer timeouts and specific SSL settings
-    redis_client = redis.from_url(
-        settings.REDIS_URL,
-        decode_responses=True,
-        socket_connect_timeout=30,  # Increased for Upstash
-        socket_timeout=30,  # Increased for Upstash
-        socket_keepalive=True,
-        socket_keepalive_options={},
-        ssl_cert_reqs=None,  # Don't verify SSL certificates for Upstash
-        retry_on_timeout=True,
-        retry_on_error=[redis.exceptions.ConnectionError, redis.exceptions.TimeoutError],
-        health_check_interval=30,
-        max_connections=10,
-    )
-    logger.info(f"Redis client initialized with URL: {settings.REDIS_URL[:20]}...")
-except Exception as e:
-    logger.error(f"Failed to create Redis client: {e}")
-    redis_client = None
+redis_client = None
+redis_available = False
+
+# Try to initialize Redis if URL is provided
+if settings.REDIS_URL and settings.REDIS_URL != "redis://localhost:6379":
+    try:
+        redis_client = redis.from_url(
+            settings.REDIS_URL,
+            decode_responses=True,
+            socket_connect_timeout=10,
+            socket_timeout=10,
+            socket_keepalive=True,
+            ssl_cert_reqs=None,
+            retry_on_timeout=True,
+            max_connections=10,
+        )
+        logger.info(f"Redis client created with URL: {settings.REDIS_URL[:30]}...")
+        
+        # Test connection
+        redis_client.ping()
+        redis_available = True
+        logger.info("✅ Redis connected successfully - caching enabled")
+        
+    except redis.exceptions.ConnectionError as e:
+        logger.warning(f"⚠️ Redis connection failed: {e}")
+        logger.warning("App will run without Redis caching")
+        redis_client = None
+        redis_available = False
+        
+    except redis.exceptions.AuthenticationError as e:
+        logger.error(f"❌ Redis authentication failed: {e}")
+        logger.error("Check your REDIS_URL password")
+        redis_client = None
+        redis_available = False
+        
+    except Exception as e:
+        logger.warning(f"⚠️ Redis initialization failed: {e}")
+        logger.warning("App will run without Redis caching")
+        redis_client = None
+        redis_available = False
+else:
+    logger.info("ℹ️ Redis not configured (REDIS_URL not set)")
 
 
 def get_redis():
     """
     Get Redis client instance.
-    Tests connection on each call to ensure Redis is available.
+    Returns None if Redis is not available.
     """
-    if redis_client is None:
-        logger.error("Redis client not initialized")
-        raise ConnectionError("Redis is not available. Please ensure Redis server is running. See REDIS_SETUP_GUIDE.md for instructions.")
+    if not redis_available or redis_client is None:
+        return None
     
     try:
-        # Test connection with timeout
         redis_client.ping()
         return redis_client
-    except redis.exceptions.TimeoutError as e:
-        logger.error(f"Redis connection timeout: {e}")
-        raise ConnectionError("Redis connection timeout. The Redis server may be unreachable or overloaded.")
     except Exception as e:
-        logger.error(f"Redis connection failed: {e}")
-        raise ConnectionError("Redis is not available. Please ensure Redis server is running. See REDIS_SETUP_GUIDE.md for instructions.")
+        logger.warning(f"Redis ping failed: {e}")
+        return None
 
 
 def is_redis_available() -> bool:
     """Check if Redis is available"""
-    if redis_client is None:
+    if not redis_available or redis_client is None:
         return False
     try:
         redis_client.ping()
