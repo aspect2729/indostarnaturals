@@ -75,7 +75,22 @@ def is_allowed_origin(origin: str) -> bool:
 # Custom CORS middleware that handles Vercel preview URLs
 @app.middleware("http")
 async def cors_middleware(request, call_next):
+    from fastapi.responses import Response
+    
     origin = request.headers.get("origin")
+    
+    # Handle preflight requests
+    if request.method == "OPTIONS" and origin and is_allowed_origin(origin):
+        return Response(
+            status_code=200,
+            headers={
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Methods": "*",
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Max-Age": "3600",
+            }
+        )
     
     response = await call_next(request)
     
@@ -85,10 +100,6 @@ async def cors_middleware(request, call_next):
         response.headers["Access-Control-Allow-Methods"] = "*"
         response.headers["Access-Control-Allow-Headers"] = "*"
         response.headers["Access-Control-Expose-Headers"] = "*"
-    
-    # Handle preflight requests
-    if request.method == "OPTIONS":
-        response.headers["Access-Control-Max-Age"] = "3600"
     
     return response
 
