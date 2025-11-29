@@ -12,13 +12,13 @@ redis_available = False
 # Try to initialize Redis if URL is provided
 if settings.REDIS_URL and settings.REDIS_URL != "redis://localhost:6379":
     try:
+        # Create Redis client without ssl_cert_reqs (not supported in all versions)
         redis_client = redis.from_url(
             settings.REDIS_URL,
             decode_responses=True,
             socket_connect_timeout=10,
             socket_timeout=10,
             socket_keepalive=True,
-            ssl_cert_reqs=None,
             retry_on_timeout=True,
             max_connections=10,
         )
