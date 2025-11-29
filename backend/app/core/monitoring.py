@@ -53,7 +53,7 @@ class MetricsCollector:
             failed_orders = db.query(func.count(Order.id)).filter(
                 and_(
                     Order.created_at >= cutoff_time,
-                    Order.payment_status == PaymentStatus.FAILED
+                    Order.payment_status == "failed"
                 )
             ).scalar() or 0
             
@@ -61,7 +61,7 @@ class MetricsCollector:
             revenue = db.query(func.sum(Order.final_amount)).filter(
                 and_(
                     Order.created_at >= cutoff_time,
-                    Order.payment_status == PaymentStatus.PAID
+                    Order.payment_status == "paid"
                 )
             ).scalar() or Decimal('0')
             
