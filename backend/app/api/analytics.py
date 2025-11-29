@@ -28,8 +28,12 @@ async def get_dashboard_metrics(
     
     Requirements: 10.1
     """
-    metrics = await AnalyticsService.get_dashboard_metrics(db)
-    return metrics
+    try:
+        metrics = await AnalyticsService.get_dashboard_metrics(db)
+        return metrics
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Failed to fetch dashboard metrics: {str(e)}")
 
 
 @router.get("/analytics/revenue")
@@ -55,8 +59,12 @@ async def get_revenue_report(
     
     Requirements: 10.1
     """
-    report = await AnalyticsService.get_revenue_report(db, start_date, end_date)
-    return report
+    try:
+        report = await AnalyticsService.get_revenue_report(db, start_date, end_date)
+        return report
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Failed to fetch revenue report: {str(e)}")
 
 
 @router.get("/inventory")

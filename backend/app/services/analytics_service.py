@@ -29,7 +29,7 @@ class AnalyticsService:
         total_revenue = db.query(
             func.coalesce(func.sum(Order.final_amount), 0)
         ).filter(
-            Order.payment_status == PaymentStatus.PAID
+            Order.payment_status == "paid"
         ).scalar()
 
         # Count total orders
@@ -39,7 +39,7 @@ class AnalyticsService:
         active_subscriptions = db.query(
             func.count(Subscription.id)
         ).filter(
-            Subscription.status == SubscriptionStatus.ACTIVE
+            Subscription.status == "active"
         ).scalar()
 
         # Get low stock alerts (products with stock < 10)
@@ -90,7 +90,7 @@ class AnalyticsService:
             func.sum(Order.final_amount).label('revenue'),
             func.count(Order.id).label('order_count')
         ).filter(
-            Order.payment_status == PaymentStatus.PAID
+            Order.payment_status == "paid"
         )
 
         # Apply date filters if provided
@@ -104,9 +104,16 @@ class AnalyticsService:
 
         results = query.all()
 
-        # Calculate totals
-        total_revenue = sum(row.revenue for row in results) if results else Decimal(0)
-        total_orders = sum(row.order_count for row in results) if results else 0
+        # Calculate totals with proper null handling
+        total_revenue = Decimal(0)
+        total_orders = 0
+        
+        if results:
+            for row in results:
+                if row.revenue:
+                    total_revenue += row.revenue
+                if row.order_count:
+                    total_orders += row.order_count
 
         return {
             "start_date": start_date.isoformat() if start_date else None,
@@ -115,9 +122,9 @@ class AnalyticsService:
             "total_orders": total_orders,
             "daily_data": [
                 {
-                    "date": row.date.isoformat(),
-                    "revenue": float(row.revenue),
-                    "order_count": row.order_count
+                    "date": row.date.isoformat() if row.date else None,
+                    "revenue": float(row.revenue) if row.revenue else 0.0,
+                    "order_count": row.order_count if row.order_count else 0
                 }
                 for row in results
             ]
