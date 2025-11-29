@@ -101,7 +101,7 @@ async def root():
 async def health_check():
     """Health check endpoint for load balancers"""
     from app.core.database import get_db
-    from app.core.redis_client import get_redis
+    from app.core.redis_client import is_redis_available
     
     health_status = {
         "status": "healthy",
@@ -120,14 +120,12 @@ async def health_check():
         health_status["status"] = "degraded"
         logger.error(f"Database health check failed: {str(e)}")
     
-    # Check Redis connectivity
-    try:
-        redis_client = get_redis()
-        redis_client.ping()
+    # Check Redis connectivity (non-blocking)
+    if is_redis_available():
         health_status["services"]["redis"] = "healthy"
-    except Exception as e:
+    else:
         health_status["services"]["redis"] = "unhealthy"
         health_status["status"] = "degraded"
-        logger.error(f"Redis health check failed: {str(e)}")
+        logger.warning("Redis health check failed - service degraded but operational")
     
     return health_status
