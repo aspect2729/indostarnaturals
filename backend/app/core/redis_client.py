@@ -6,11 +6,13 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 # Create Redis client (lazy connection - will connect on first use)
+# Support both redis:// and rediss:// (TLS) URLs
 redis_client = redis.from_url(
     settings.REDIS_URL,
     decode_responses=True,
-    socket_connect_timeout=5,
-    socket_timeout=5,
+    socket_connect_timeout=10,
+    socket_timeout=10,
+    ssl_cert_reqs=None,  # Don't verify SSL certificates for Upstash
 )
 
 
