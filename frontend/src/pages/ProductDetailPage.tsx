@@ -97,7 +97,7 @@ const ProductDetailPage: React.FC = () => {
           // Payment successful
           try {
             await subscriptionService.handleRazorpaySubscription(
-              response.subscription_id,
+              response.subscription.id,
               razorpayResponse.razorpay_payment_id,
               razorpayResponse.razorpay_subscription_id,
               razorpayResponse.razorpay_signature
