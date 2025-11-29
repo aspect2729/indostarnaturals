@@ -106,13 +106,23 @@ class GoogleOAuthService:
                 db.refresh(user)
                 return user
         
+        # Determine role based on authorized owner emails
+        user_email = google_info.get('email', '').lower()
+        role = UserRole.CONSUMER
+        
+        # Check if email is in the authorized owner list
+        if settings.GOOGLE_OAUTH_OWNER_EMAILS:
+            owner_emails = [email.strip().lower() for email in settings.GOOGLE_OAUTH_OWNER_EMAILS.split(',')]
+            if user_email in owner_emails:
+                role = UserRole.OWNER
+        
         # Create new user
         new_user = User(
             email=google_info.get('email'),
             phone='',  # Will need to be added later
             name=google_info.get('name', 'Google User'),
             google_id=google_info['google_id'],
-            role=UserRole.CONSUMER,
+            role=role,
             is_email_verified=google_info.get('email_verified', False),
             is_active=True
         )

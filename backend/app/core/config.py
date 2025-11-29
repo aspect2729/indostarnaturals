@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     # Google OAuth
     GOOGLE_OAUTH_CLIENT_ID: str | None = None
     GOOGLE_OAUTH_CLIENT_SECRET: str | None = None
+    GOOGLE_OAUTH_OWNER_EMAILS: str | None = None  # Comma-separated list of owner emails
     
     # S3 Storage
     S3_BUCKET_NAME: str

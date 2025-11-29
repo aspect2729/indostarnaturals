@@ -14,7 +14,8 @@ from app.schemas.subscription import (
     SubscriptionCreate,
     SubscriptionResponse,
     SubscriptionListResponse,
-    RazorpaySubscriptionResponse
+    RazorpaySubscriptionResponse,
+    SubscriptionPaymentVerification
 )
 
 router = APIRouter(prefix="/api/v1/subscriptions", tags=["subscriptions"])
@@ -257,4 +258,42 @@ def cancel_subscription(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to cancel subscription: {str(e)}"
+        )
+
+
+@router.post("/{subscription_id}/verify-payment", response_model=SubscriptionResponse)
+def verify_subscription_payment(
+    subscription_id: int,
+    payment_data: SubscriptionPaymentVerification,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Verify subscription payment after Razorpay checkout.
+    
+    Validates the payment signature from Razorpay to ensure payment authenticity.
+    
+    Requirements: 7.2
+    """
+    try:
+        subscription = subscription_service.verify_subscription_payment(
+            subscription_id=subscription_id,
+            user_id=current_user.id,
+            razorpay_payment_id=payment_data.razorpay_payment_id,
+            razorpay_subscription_id=payment_data.razorpay_subscription_id,
+            razorpay_signature=payment_data.razorpay_signature,
+            db=db
+        )
+        
+        return subscription
+        
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to verify subscription payment: {str(e)}"
         )

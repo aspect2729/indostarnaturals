@@ -86,3 +86,10 @@ class RazorpaySubscriptionResponse(BaseModel):
     status: str
     subscription_id: int
     key_id: str
+
+
+class SubscriptionPaymentVerification(BaseModel):
+    """Schema for verifying subscription payment"""
+    razorpay_payment_id: str
+    razorpay_subscription_id: str
+    razorpay_signature: str

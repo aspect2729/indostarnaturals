@@ -356,6 +356,61 @@ class SubscriptionService:
         
         return subscription
     
+    def verify_subscription_payment(
+        self,
+        subscription_id: int,
+        user_id: int,
+        razorpay_payment_id: str,
+        razorpay_subscription_id: str,
+        razorpay_signature: str,
+        db: Session
+    ) -> Subscription:
+        """
+        Verify subscription payment signature from Razorpay.
+        
+        Args:
+            subscription_id: Subscription ID
+            user_id: User ID (for ownership validation)
+            razorpay_payment_id: Razorpay payment ID
+            razorpay_subscription_id: Razorpay subscription ID
+            razorpay_signature: Razorpay signature for verification
+            db: Database session
+            
+        Returns:
+            Updated Subscription object
+            
+        Raises:
+            ValueError: If verification fails or subscription not found
+        """
+        # Get subscription
+        subscription = db.query(Subscription).filter(
+            and_(
+                Subscription.id == subscription_id,
+                Subscription.user_id == user_id
+            )
+        ).first()
+        
+        if not subscription:
+            raise ValueError(f"Subscription with ID {subscription_id} not found or does not belong to user")
+        
+        # Verify signature if Razorpay is enabled
+        if self.razorpay_enabled:
+            try:
+                # Verify payment signature
+                params_dict = {
+                    'razorpay_payment_id': razorpay_payment_id,
+                    'razorpay_subscription_id': razorpay_subscription_id,
+                    'razorpay_signature': razorpay_signature
+                }
+                self.client.utility.verify_payment_signature(params_dict)
+            except Exception as e:
+                raise ValueError(f"Payment signature verification failed: {str(e)}")
+        
+        # Payment verified successfully - subscription is already active from creation
+        # Just return the subscription
+        db.refresh(subscription)
+        return subscription
+    
     def process_subscription_charge(
         self,
         razorpay_subscription_id: str,
