@@ -52,3 +52,5 @@ build/
 
 # Docker
 *.tar.gz
+.vercel
+.env*.local

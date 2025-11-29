@@ -43,17 +43,22 @@ add_exception_handlers(app)
 # CORS Configuration
 # Allow multiple frontend origins for development and production
 allowed_origins = [
-    settings.FRONTEND_URL,  # Production frontend URL (set in environment variables)
     "http://localhost:5173",  # Local Vite dev server
     "http://localhost:5174",  # Alternative local port
     "http://localhost:3000",  # Alternative local port
 ]
 
-# In production, also allow Vercel preview deployments
-if settings.ENVIRONMENT == "production":
-    # Add your Vercel domain pattern
-    # Vercel preview URLs follow pattern: https://your-app-*.vercel.app
-    allowed_origins.append("https://*.vercel.app")
+# Add production frontend URL if configured
+if settings.FRONTEND_URL:
+    allowed_origins.append(settings.FRONTEND_URL)
+
+# Add Vercel deployment URLs
+allowed_origins.extend([
+    "https://indostarnaturals.vercel.app",
+    "https://indostarnaturals-git-main.vercel.app",  # Git branch deployments
+])
+
+logger.info(f"CORS allowed origins: {allowed_origins}")
 
 app.add_middleware(
     CORSMiddleware,
